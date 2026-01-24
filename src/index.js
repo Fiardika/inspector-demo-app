@@ -122,6 +122,24 @@ app.get('/fetch', async (req, res) => {
   }
 });
 
+// VULNERABILITY: Server-Side Request Forgery (SSRF)
+app.get('/proxy', async (req, res) => {
+  const url = req.query.url;
+  const response = await axios.get(url);
+  res.json(response.data);
+});
+
+// VULNERABILITY: Hardcoded JWT secret
+const JWT_SECRET = "my-super-secret-jwt-key-12345";
+
+// VULNERABILITY: NoSQL Injection simulation
+app.get('/search', (req, res) => {
+  const query = req.query.q;
+  // Simulated MongoDB query - vulnerable to injection
+  const filter = JSON.parse(query);
+  res.json({ filter, message: 'Search executed' });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
