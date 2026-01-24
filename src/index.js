@@ -40,15 +40,34 @@ app.get('/time', (req, res) => {
   });
 });
 
-// FIXED: Safe calculator - only allows numbers and basic operators
+// FIXED: Safe calculator - manual parsing, no eval/Function
 app.get('/calc', (req, res) => {
-  const expression = req.query.expr || '';
-  // Whitelist: only digits, +, -, *, /, ., (, ), spaces
-  if (!/^[\d+\-*/().\s]+$/.test(expression)) {
+  const expr = req.query.expr || '';
+  
+  // Only allow: numbers, +, -, *, /
+  if (!/^[\d+\-*/.\s]+$/.test(expr)) {
     return res.status(400).json({ error: 'Invalid expression' });
   }
+  
   try {
-    const result = Function('"use strict"; return (' + expression + ')')();
+    // Parse and calculate manually
+    const tokens = expr.match(/(\d+\.?\d*|[+\-*/])/g) || [];
+    if (tokens.length === 0) {
+      return res.status(400).json({ error: 'Empty expression' });
+    }
+    
+    // Simple left-to-right calculation (no operator precedence for simplicity)
+    let result = parseFloat(tokens[0]);
+    for (let i = 1; i < tokens.length; i += 2) {
+      const op = tokens[i];
+      const num = parseFloat(tokens[i + 1]);
+      if (isNaN(num)) break;
+      if (op === '+') result += num;
+      else if (op === '-') result -= num;
+      else if (op === '*') result *= num;
+      else if (op === '/') result = num !== 0 ? result / num : NaN;
+    }
+    
     res.json({ result });
   } catch (e) {
     res.status(400).json({ error: 'Invalid expression' });
