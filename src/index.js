@@ -40,25 +40,40 @@ app.get('/time', (req, res) => {
   });
 });
 
-// VULNERABILITY: Eval injection - extremely dangerous
+// FIXED: Safe calculator - only allows numbers and basic operators
 app.get('/calc', (req, res) => {
-  const expression = req.query.expr;
-  const result = eval(expression);
-  res.json({ result });
+  const expression = req.query.expr || '';
+  // Whitelist: only digits, +, -, *, /, ., (, ), spaces
+  if (!/^[\d+\-*/().\s]+$/.test(expression)) {
+    return res.status(400).json({ error: 'Invalid expression' });
+  }
+  try {
+    const result = Function('"use strict"; return (' + expression + ')')();
+    res.json({ result });
+  } catch (e) {
+    res.status(400).json({ error: 'Invalid expression' });
+  }
 });
 
-// VULNERABILITY: Path traversal - read arbitrary files
+// FIXED: Safe file reader - restrict to allowed directory
 const fs = require('fs');
 const path = require('path');
+const ALLOWED_DIR = path.join(__dirname, 'public');
 app.get('/file', (req, res) => {
   const filename = req.query.name;
-  const content = fs.readFileSync(filename, 'utf8');
-  res.send(content);
+  const safePath = path.join(ALLOWED_DIR, path.basename(filename));
+  
+  if (!safePath.startsWith(ALLOWED_DIR)) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+  
+  try {
+    const content = fs.readFileSync(safePath, 'utf8');
+    res.send(content);
+  } catch (e) {
+    res.status(404).json({ error: 'File not found' });
+  }
 });
-
-// VULNERABILITY: Hardcoded AWS credentials
-const AWS_ACCESS_KEY = "AKIAIOSFODNN7EXAMPLE";
-const AWS_SECRET_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
 
 // New feature: Random number generator
 app.get('/random', (req, res) => {
