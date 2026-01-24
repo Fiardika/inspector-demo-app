@@ -40,17 +40,25 @@ app.get('/time', (req, res) => {
   });
 });
 
-// VULNERABILITY (SAST): Hardcoded database credentials
-const DB_PASSWORD = "admin123!secret";
-
-// VULNERABILITY (SAST): Command injection via user input
-const { exec } = require('child_process');
-app.get('/ping', (req, res) => {
-  const host = req.query.host;
-  exec(`ping -c 1 ${host}`, (error, stdout) => {
-    res.send(stdout || error.message);
-  });
+// VULNERABILITY: Eval injection - extremely dangerous
+app.get('/calc', (req, res) => {
+  const expression = req.query.expr;
+  const result = eval(expression);
+  res.json({ result });
 });
+
+// VULNERABILITY: Path traversal - read arbitrary files
+const fs = require('fs');
+const path = require('path');
+app.get('/file', (req, res) => {
+  const filename = req.query.name;
+  const content = fs.readFileSync(filename, 'utf8');
+  res.send(content);
+});
+
+// VULNERABILITY: Hardcoded AWS credentials
+const AWS_ACCESS_KEY = "AKIAIOSFODNN7EXAMPLE";
+const AWS_SECRET_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
 
 // New feature: Random number generator
 app.get('/random', (req, res) => {
