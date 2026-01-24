@@ -44,9 +44,12 @@ app.get('/time', (req, res) => {
 app.get('/calc', (req, res) => {
   const expr = req.query.expr || '';
   
-  // Only allow: numbers, +, -, *, /
-  if (!/^[\d+\-*/.\s]+$/.test(expr)) {
-    return res.status(400).json({ error: 'Invalid expression' });
+  // Validate characters without regex on user input (prevent ReDoS)
+  const allowedChars = '0123456789+-*/.  ';
+  for (const char of expr) {
+    if (!allowedChars.includes(char)) {
+      return res.status(400).json({ error: 'Invalid expression' });
+    }
   }
   
   try {
