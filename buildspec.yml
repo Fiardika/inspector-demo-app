@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    IMAGE_NAME: "inspector-demo-app"
+    IMAGE_NAME: "aws-ug-demo-ecr"
 
 phases:
   pre_build:
