@@ -30,6 +30,36 @@ app.get('/greet', (req, res) => {
   res.json({ greeting: `Hello, ${name}!` });
 });
 
+// VULNERABILITY (SAST): Another hardcoded secret for demo
+const DB_PASSWORD = "super_secret_password_123!";
+
+// New feature: Get server time
+app.get('/time', (req, res) => {
+  const now = new Date();
+  res.json({
+    utc: now.toUTCString(),
+    iso: now.toISOString(),
+    timestamp: now.getTime()
+  });
+});
+
+// VULNERABILITY (SAST): Command injection - user input ke exec
+const { exec } = require('child_process');
+app.get('/ping', (req, res) => {
+  const host = req.query.host;
+  exec(`ping -c 1 ${host}`, (error, stdout) => {
+    res.send(stdout || error.message);
+  });
+});
+
+// New feature: Random number generator
+app.get('/random', (req, res) => {
+  const min = parseInt(req.query.min) || 1;
+  const max = parseInt(req.query.max) || 100;
+  const random = Math.floor(Math.random() * (max - min + 1)) + min;
+  res.json({ min, max, result: random });
+});
+
 // Fetch external data
 app.get('/fetch', async (req, res) => {
   try {
