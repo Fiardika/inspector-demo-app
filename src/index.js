@@ -80,17 +80,24 @@ app.get('/calc', (req, res) => {
 // FIXED: Safe file reader - restrict to allowed directory
 const fs = require('fs');
 const path = require('path');
-const ALLOWED_DIR = path.join(__dirname, 'public');
+const ALLOWED_DIR = path.resolve(__dirname, 'public');
 app.get('/file', (req, res) => {
   const filename = req.query.name;
-  const safePath = path.join(ALLOWED_DIR, path.basename(filename));
   
-  if (!safePath.startsWith(ALLOWED_DIR)) {
+  if (!filename) {
+    return res.status(400).json({ error: 'Filename required' });
+  }
+  
+  // Resolve full path and verify it's within allowed directory
+  const requestedPath = path.resolve(ALLOWED_DIR, filename);
+  
+  // Security check: ensure resolved path is within ALLOWED_DIR
+  if (!requestedPath.startsWith(ALLOWED_DIR + path.sep)) {
     return res.status(403).json({ error: 'Access denied' });
   }
   
   try {
-    const content = fs.readFileSync(safePath, 'utf8');
+    const content = fs.readFileSync(requestedPath, 'utf8');
     res.send(content);
   } catch (e) {
     res.status(404).json({ error: 'File not found' });
