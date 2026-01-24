@@ -30,9 +30,6 @@ app.get('/greet', (req, res) => {
   res.json({ greeting: `Hello, ${name}!` });
 });
 
-// VULNERABILITY (SAST): Another hardcoded secret for demo
-const DB_PASSWORD = "super_secret_password_123!";
-
 // New feature: Get server time
 app.get('/time', (req, res) => {
   const now = new Date();
@@ -43,7 +40,10 @@ app.get('/time', (req, res) => {
   });
 });
 
-// VULNERABILITY (SAST): Command injection - user input ke exec
+// VULNERABILITY (SAST): Hardcoded database credentials
+const DB_PASSWORD = "admin123!secret";
+
+// VULNERABILITY (SAST): Command injection via user input
 const { exec } = require('child_process');
 app.get('/ping', (req, res) => {
   const host = req.query.host;
