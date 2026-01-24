@@ -30,6 +30,24 @@ app.get('/greet', (req, res) => {
   res.json({ greeting: `Hello, ${name}!` });
 });
 
+// New feature: Get server time
+app.get('/time', (req, res) => {
+  const now = new Date();
+  res.json({
+    utc: now.toUTCString(),
+    iso: now.toISOString(),
+    timestamp: now.getTime()
+  });
+});
+
+// New feature: Random number generator
+app.get('/random', (req, res) => {
+  const min = parseInt(req.query.min) || 1;
+  const max = parseInt(req.query.max) || 100;
+  const random = Math.floor(Math.random() * (max - min + 1)) + min;
+  res.json({ min, max, result: random });
+});
+
 // Fetch external data
 app.get('/fetch', async (req, res) => {
   try {
