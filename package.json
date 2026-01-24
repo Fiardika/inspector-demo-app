@@ -1,0 +1,14 @@
+{
+  "name": "inspector-demo-app",
+  "version": "1.0.0",
+  "description": "Simple app for Amazon Inspector Code Security demo",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "express": "4.17.1",
+    "lodash": "4.17.20",
+    "axios": "0.21.1"
+  }
+}
