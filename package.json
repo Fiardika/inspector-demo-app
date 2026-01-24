@@ -1,5 +1,6 @@
 {
-  "name": "inspector-demo-app",
+  "name": "@fiardika/inspector-demo-app",
+  "private": true,
   "version": "1.0.0",
   "description": "Simple app for Amazon Inspector Code Security demo",
   "main": "src/index.js",
